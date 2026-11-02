@@ -1,0 +1,12 @@
+entity_id,display_name,en_wikipedia_title,title_pinned_on,title_status,notes
+anthropic,Anthropic,Anthropic,2026-11-02,verify_before_backfill,
+openai,OpenAI,OpenAI,2026-11-02,verify_before_backfill,
+google_deepmind,Google DeepMind,Google_DeepMind,2026-11-02,verify_before_backfill,
+meta_ai,Meta AI,Meta_AI,2026-11-02,verify_before_backfill,
+mistral_ai,Mistral AI,Mistral_AI,2026-11-02,verify_before_backfill,
+cohere,Cohere,Cohere,2026-11-02,verify_before_backfill,
+hugging_face,Hugging Face,Hugging_Face,2026-11-02,verify_before_backfill,
+xai,xAI,XAI_(company),2026-11-02,verify_before_backfill,Article may be titled differently; redirects split traffic
+stability_ai,Stability AI,Stability_AI,2026-11-02,verify_before_backfill,
+perplexity,Perplexity AI,Perplexity_AI,2026-11-02,verify_before_backfill,
+inflection_ai,Inflection AI,Inflection_AI,2026-11-02,verify_before_backfill,
