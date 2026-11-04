@@ -1,0 +1,72 @@
+import csv
+import gzip
+from pathlib import Path
+
+import pytest
+
+from pageviews_anomaly.ingest import OUTPUT_FIELDS, stage_hour
+from pageviews_anomaly.seed import load_seed, title_to_entity
+
+SEED = Path(__file__).resolve().parents[1] / "seeds" / "ai_companies.csv"
+
+
+def test_real_seed_loads_and_titles_are_unique():
+    rows = load_seed(SEED)
+    assert len(rows) >= 40
+    mapping = title_to_entity(rows)  # raises on duplicates
+    assert "Anthropic" in mapping and mapping["Anthropic"] == "anthropic"
+
+
+def test_every_row_has_role_and_known_status():
+    rows = load_seed(SEED)
+    assert {r["role"] for r in rows} <= {"startup", "benchmark"}
+    assert all(r["title_status"] for r in rows)
+
+
+def test_duplicate_title_raises():
+    rows = [
+        {"entity_id": "a", "en_wikipedia_title": "Same"},
+        {"entity_id": "b", "en_wikipedia_title": "Same"},
+    ]
+    with pytest.raises(ValueError):
+        title_to_entity(rows)
+
+
+def test_blank_title_is_skipped():
+    rows = [{"entity_id": "a", "en_wikipedia_title": ""}, {"entity_id": "b", "en_wikipedia_title": "B"}]
+    assert title_to_entity(rows) == {"B": "b"}
+
+
+def test_stage_hour_filters_and_writes_gzip_csv(tmp_path):
+    seed = {"Anthropic": "anthropic", "Hugging_Face": "hugging_face"}
+    lines = [
+        "en.wikipedia Anthropic 10 0",
+        "de.wikipedia Anthropic 99 0",
+        "en.wikipedia Hugging%20Face 7 0",
+        "en.wikipedia Main_Page 500 0",
+        "bad line",
+    ]
+    out = stage_hour("2026-11-02T14:00:00Z", seed, tmp_path, lines=lines)
+    assert out.name == "pageviews_20261102-140000.csv.gz"
+    with gzip.open(out, "rt", encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+    assert rows[0] == OUTPUT_FIELDS
+    assert rows[1:] == [
+        ["anthropic", "Anthropic", "2026-11-02T14:00:00Z", "10"],
+        ["hugging_face", "Hugging_Face", "2026-11-02T14:00:00Z", "7"],
+    ]
+
+
+def test_stage_hour_is_idempotent(tmp_path):
+    seed = {"Anthropic": "anthropic"}
+    lines = ["en.wikipedia Anthropic 10 0"]
+    first = stage_hour("2026-11-02T14:00:00Z", seed, tmp_path, lines=lines)
+    second = stage_hour("2026-11-02T14:00:00Z", seed, tmp_path, lines=lines)
+    assert first == second
+    assert sorted(p.name for p in tmp_path.iterdir()) == [first.name]
+
+
+def test_stage_hour_empty_hour_still_writes_header(tmp_path):
+    out = stage_hour("2026-11-02T14:00:00Z", {"Anthropic": "anthropic"}, tmp_path, lines=[])
+    with gzip.open(out, "rt", encoding="utf-8") as f:
+        assert list(csv.reader(f)) == [OUTPUT_FIELDS]

@@ -27,7 +27,7 @@ seeds/ai_companies.csv          versioned entity -> en.wikipedia title map
 src/pageviews_anomaly/parse.py  dump line parsing, title filtering, dump URL builder
 src/pageviews_anomaly/anomaly.py rolling-baseline z-score (pure Python, no Spark)
 tests/                          unit tests for the above
-docs/                           problem statement, decisions log
+docs/                           problem statement, decisions log, scope change
 ```
 
 ## Running the tests
@@ -43,8 +43,9 @@ PYTHONPATH=src pytest -q
    live article. Titles are marked `verify_before_backfill`. Change
    `title_status` to `verified` once checked, and record any rename in the
    seed with a new `title_pinned_on` date.
-2. Expand the seed toward the 15–25 entities in the problem statement. It
-   currently has the 11 named there.
+2. Expand the startup panel toward 15–25 companies using the inclusion rule in
+   `docs/scope_change_2026-11-03.md`. The seed's startup and benchmark counts are
+   listed in `seeds/ai_companies.csv`.
 3. Decide whether the per-agent (user-traffic) dump variant is available, and
    compare it against the all-agents series (see Known limitations in the
    problem statement).

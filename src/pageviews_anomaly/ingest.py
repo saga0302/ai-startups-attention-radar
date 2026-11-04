@@ -1,0 +1,70 @@
+"""Download one hour of Wikimedia pageviews, filter it to the panel, and stage it.
+
+Output is one gzipped CSV per hour, written atomically so a failed run never
+leaves a partial file that looks complete.
+"""
+
+from __future__ import annotations
+
+import csv
+import gzip
+import io
+import os
+import tempfile
+import urllib.request
+from datetime import datetime
+from pathlib import Path
+from typing import Iterable, Iterator
+
+from pageviews_anomaly.parse import PageviewRecord, dump_url, filter_lines
+
+USER_AGENT = "pageviews-anomaly-pipeline/0.1 (research; contact: project owner)"
+OUTPUT_FIELDS = ["entity_id", "en_wikipedia_title", "hour_utc", "views"]
+
+
+def iter_dump_lines(url: str, timeout: int = 120) -> Iterator[str]:
+    """Stream a gzipped dump over HTTP, yielding decoded lines without loading it all into memory."""
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        with gzip.GzipFile(fileobj=response) as gz:
+            text = io.TextIOWrapper(gz, encoding="utf-8", errors="replace")
+            yield from text
+
+
+def stage_hour(
+    hour_utc: str,
+    seed_map: dict[str, str],
+    out_dir: str | Path,
+    lines: Iterable[str] | None = None,
+) -> Path:
+    """Filter one hour of dump lines to the panel and write them to out_dir.
+
+    lines defaults to the live dump for hour_utc. Tests pass lines directly.
+    Returns the path of the written file.
+    """
+    if lines is None:
+        lines = iter_dump_lines(dump_url(hour_utc))
+
+    records: list[PageviewRecord] = list(filter_lines(lines, seed_map, hour_utc))
+
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    dt = datetime.strptime(hour_utc, "%Y-%m-%dT%H:%M:%SZ")
+    final_path = out_dir / f"pageviews_{dt:%Y%m%d}-{dt:%H}0000.csv.gz"
+
+    fd, tmp_name = tempfile.mkstemp(dir=out_dir, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "wb") as raw:
+            with gzip.GzipFile(fileobj=raw, mode="wb") as gz:
+                text = io.TextIOWrapper(gz, encoding="utf-8", newline="")
+                writer = csv.writer(text)
+                writer.writerow(OUTPUT_FIELDS)
+                for r in records:
+                    writer.writerow([r.entity_id, r.en_wikipedia_title, r.hour_utc, r.views])
+                text.flush()
+        os.replace(tmp_name, final_path)
+    except BaseException:
+        if os.path.exists(tmp_name):
+            os.remove(tmp_name)
+        raise
+    return final_path

@@ -2,6 +2,19 @@
 
 Each entry: date, decision, reason. Newest first.
 
+## 2026-11-03: Panel is US AI startups, plus two labelled benchmark labs
+
+- Startups are the main panel, so companies can compare visibility with peers.
+- Anthropic and OpenAI stay as `role = benchmark` to show what high attention looks like.
+- xAI (US, large) added as a benchmark.
+- Google DeepMind, Meta AI, and Microsoft AI added as benchmarks.
+- Startup headquarters checked against Wikipedia's category "Artificial intelligence industry in the United States". 19 startups are in the category; 22 are not and need checking.
+- CoreWeave not in the panel. Its status as a large AI company is still undecided.
+- Startup panel expanded to all high- and medium-confidence candidates from the Wikipedia AI company list. Medium-confidence headquarters still need verifying.
+- Panel size is no longer capped at 15 to 25. The problem statement PDF still says 15 to 25 and needs updating in the source document.
+- Non-US labs were removed. Full rule and limits in `docs/scope_change_2026-11-03.md`.
+- Titles are unverified; every entry stays `verify_before_backfill` until checked on Wikipedia.
+
 ## 2026-11-02: Baseline excludes the current value; zero-variance windows give a null z
 
 - The baseline is the trailing 30 observations strictly before the evaluation
