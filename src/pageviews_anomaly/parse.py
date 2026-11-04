@@ -13,6 +13,8 @@ import urllib.parse
 from dataclasses import dataclass
 from typing import Iterable, Iterator, Mapping
 
+from datetime import datetime, timezone
+
 
 @dataclass(frozen=True)
 class PageviewRecord:
@@ -41,25 +43,25 @@ def parse_line(line: str) -> tuple[str, str, int] | None:
         return None
     return domain, normalize_title(title), views
 
+# Desktop and mobile web are both English Wikipedia. Their views are summed per article.
+ENGLISH_WIKIPEDIA_DOMAINS = ("en", "en.m")
 
 def filter_lines(
     lines: Iterable[str],
     title_to_entity: Mapping[str, str],
     hour_utc: str,
-    domain: str = "en.wikipedia",
+    domains: tuple[str, ...] = ENGLISH_WIKIPEDIA_DOMAINS,
 ) -> Iterator[PageviewRecord]:
     """Yield records for in-scope titles from one hour of dump lines.
 
-    title_to_entity maps normalized en.wikipedia titles to entity_id. Titles are
-    matched exactly after normalization; redirects are NOT resolved here, so a
-    renamed article shows up as a separate title until the seed is updated.
+    Desktop and mobile web rows are yielded separately; the caller sums them.
     """
     for line in lines:
         parsed = parse_line(line)
         if parsed is None:
             continue
         line_domain, title, views = parsed
-        if line_domain != domain:
+        if line_domain not in domains:
             continue
         entity_id = title_to_entity.get(title)
         if entity_id is None:
@@ -69,7 +71,6 @@ def filter_lines(
 
 def dump_url(hour_utc_iso: str, base: str = "https://dumps.wikimedia.org/other/pageviews") -> str:
     """Build the hourly dump URL for an ISO hour such as '2026-11-02T14:00:00Z'."""
-    from datetime import datetime, timezone
 
     dt = datetime.strptime(hour_utc_iso, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
     return (

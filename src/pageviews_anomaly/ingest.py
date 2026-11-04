@@ -16,7 +16,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Iterable, Iterator
 
-from pageviews_anomaly.parse import PageviewRecord, dump_url, filter_lines
+from pageviews_anomaly.parse import dump_url, filter_lines
 
 USER_AGENT = "pageviews-anomaly-pipeline/0.1 (research; contact: project owner)"
 OUTPUT_FIELDS = ["entity_id", "en_wikipedia_title", "hour_utc", "views"]
@@ -45,7 +45,11 @@ def stage_hour(
     if lines is None:
         lines = iter_dump_lines(dump_url(hour_utc))
 
-    records: list[PageviewRecord] = list(filter_lines(lines, seed_map, hour_utc))
+        # Sum desktop and mobile web views per article for this hour.
+    totals: dict[tuple[str, str], int] = {}
+    for r in filter_lines(lines, seed_map, hour_utc):
+        key = (r.entity_id, r.en_wikipedia_title)
+        totals[key] = totals.get(key, 0) + r.views
 
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -59,8 +63,8 @@ def stage_hour(
                 text = io.TextIOWrapper(gz, encoding="utf-8", newline="")
                 writer = csv.writer(text)
                 writer.writerow(OUTPUT_FIELDS)
-                for r in records:
-                    writer.writerow([r.entity_id, r.en_wikipedia_title, r.hour_utc, r.views])
+                for (entity_id, title), views in sorted(totals.items()):
+                    writer.writerow([entity_id, title, hour_utc, views])
                 text.flush()
         os.replace(tmp_name, final_path)
     except BaseException:

@@ -9,17 +9,17 @@ MAPPING = {"Anthropic": "anthropic", "Hugging_Face": "hugging_face"}
 
 
 def test_parse_line_basic():
-    assert parse_line("en.wikipedia Anthropic 42 1000") == ("en.wikipedia", "Anthropic", 42)
+    assert parse_line("en Anthropic 42 1000") == ("en", "Anthropic", 42)
 
 
 def test_parse_line_three_fields_ok():
-    assert parse_line("en.wikipedia Anthropic 42") == ("en.wikipedia", "Anthropic", 42)
+    assert parse_line("en Anthropic 42") == ("en", "Anthropic", 42)
 
 
 def test_parse_line_malformed_returns_none():
-    assert parse_line("en.wikipedia Anthropic") is None
-    assert parse_line("en.wikipedia Anthropic abc 0") is None
-    assert parse_line("en.wikipedia Anthropic -3 0") is None
+    assert parse_line("en Anthropic") is None
+    assert parse_line("en Anthropic abc 0") is None
+    assert parse_line("en Anthropic -3 0") is None
 
 
 def test_normalize_title_decodes_and_underscores():
@@ -29,10 +29,10 @@ def test_normalize_title_decodes_and_underscores():
 
 def test_filter_keeps_only_in_scope_english_wikipedia():
     lines = [
-        "en.wikipedia Anthropic 10 0",
-        "de.wikipedia Anthropic 99 0",
-        "en.wikipedia Main_Page 500 0",
-        "en.wikipedia Hugging%20Face 7 0",
+        "en Anthropic 10 0",
+        "de Anthropic 99 0",
+        "en Main_Page 500 0",
+        "en Hugging%20Face 7 0",
         "garbage line",
     ]
     records = list(filter_lines(lines, MAPPING, "2026-11-02T14:00:00Z"))

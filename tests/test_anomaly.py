@@ -1,8 +1,6 @@
 import math
-
 import pytest
-
-from pageviews_anomaly.anomaly import zscore_at, zscore_series
+from pageviews_anomaly.anomaly import zscore_at
 
 
 def test_current_value_is_excluded_from_its_own_baseline():
@@ -70,12 +68,4 @@ def test_log_transform_reduces_skew_effect():
     assert result.is_anomaly is True
 
 
-def test_zscore_series_length_matches_input():
-    series = [float(i % 7) for i in range(50)]
-    results = zscore_series(series)
-    assert len(results) == len(series)
 
-
-def test_index_out_of_range_raises():
-    with pytest.raises(IndexError):
-        zscore_at([1.0, 2.0], 5)

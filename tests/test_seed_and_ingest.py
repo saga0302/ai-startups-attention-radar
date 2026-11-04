@@ -32,7 +32,7 @@ def test_duplicate_title_raises():
         title_to_entity(rows)
 
 
-def test_blank_title_is_skipped():
+def test_blank_seed_title_is_skipped():
     rows = [{"entity_id": "a", "en_wikipedia_title": ""}, {"entity_id": "b", "en_wikipedia_title": "B"}]
     assert title_to_entity(rows) == {"B": "b"}
 
@@ -40,10 +40,10 @@ def test_blank_title_is_skipped():
 def test_stage_hour_filters_and_writes_gzip_csv(tmp_path):
     seed = {"Anthropic": "anthropic", "Hugging_Face": "hugging_face"}
     lines = [
-        "en.wikipedia Anthropic 10 0",
-        "de.wikipedia Anthropic 99 0",
-        "en.wikipedia Hugging%20Face 7 0",
-        "en.wikipedia Main_Page 500 0",
+        "en Anthropic 10 0",
+        "de Anthropic 99 0",
+        "en Hugging%20Face 7 0",
+        "en Main_Page 500 0",
         "bad line",
     ]
     out = stage_hour("2026-11-02T14:00:00Z", seed, tmp_path, lines=lines)
@@ -59,7 +59,7 @@ def test_stage_hour_filters_and_writes_gzip_csv(tmp_path):
 
 def test_stage_hour_is_idempotent(tmp_path):
     seed = {"Anthropic": "anthropic"}
-    lines = ["en.wikipedia Anthropic 10 0"]
+    lines = ["en Anthropic 10 0"]
     first = stage_hour("2026-11-02T14:00:00Z", seed, tmp_path, lines=lines)
     second = stage_hour("2026-11-02T14:00:00Z", seed, tmp_path, lines=lines)
     assert first == second
@@ -70,3 +70,14 @@ def test_stage_hour_empty_hour_still_writes_header(tmp_path):
     out = stage_hour("2026-11-02T14:00:00Z", {"Anthropic": "anthropic"}, tmp_path, lines=[])
     with gzip.open(out, "rt", encoding="utf-8") as f:
         assert list(csv.reader(f)) == [OUTPUT_FIELDS]
+
+def test_stage_hour_sums_desktop_and_mobile_views(tmp_path):
+    seed = {"Anthropic": "anthropic"}
+    lines = [
+        "en Anthropic 10 0",
+        "en.m Anthropic 25 0",
+    ]
+    out = stage_hour("2026-11-02T14:00:00Z", seed, tmp_path, lines=lines)
+    with gzip.open(out, "rt", encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+    assert rows[1:] == [["anthropic", "Anthropic", "2026-11-02T14:00:00Z", "35"]]

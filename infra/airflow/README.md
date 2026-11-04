@@ -1,39 +1,37 @@
-# Keeping Airflow running
+# Airflow on EC2
 
-Airflow in Docker stops when Docker stops. Three things have to be true for
-it to keep running:
+Airflow runs on an AWS EC2 server, not on a laptop. It keeps running when the
+computer is off.
 
-1. **Docker starts on login.** Docker Desktop → Settings → General →
-   tick "Start Docker Desktop when you sign in to your computer".
-2. **Containers restart with the daemon.** Apply `docker-compose.restart.yml`
-   (see the comments in that file for the service names to match):
+## Server
+- Region: us-east-2 (Ohio)
+- OS: Ubuntu Server 24.04 LTS
+- Instance: m7i-flex.large (2 vCPU, 8 GB RAM), 30 GB disk, 2 GB swap
+- Airflow: 3.3.2, installed with Docker Compose in `~/airflow`
 
-   ```bash
-   docker compose -f docker-compose.yaml -f docker-compose.restart.yml up -d
-   ```
+## What is on the server (not in this repo)
+- `~/airflow/docker-compose.yaml`: Airflow's official Docker setup
+- `~/airflow/docker-compose.restart.yml`: restart rules, so Airflow comes back after a reboot
+- `~/airflow/.env`: secret keys. Never copy this into Git.
+- `~/airflow/dags/`: the DAG and the code it uses. Copied from this repo.
 
-   After this, `docker ps` shows `restart: unless-stopped` behavior
-   on the Airflow containers, and they come back after a reboot.
-3. **Missed runs are recovered, not lost.** This matters more than the
-   restart policy. When the laptop sleeps or is off, hourly runs are missed.
-   The planned DAG (Phase 2, not yet written) will use `catchup=True` so that
-   when Airflow returns it re-runs the missed hours in order. The Databricks
-   writes will use `MERGE` on `(entity_id, hour_utc)`, so re-running an hour
-   never double counts.
+## Access
+- The web page is on port 8080. It only accepts connections from my current IP.
+- SSH is on port 22, from my current IP only.
+- Log in with the `airflow-key.pem` key. Keep it out of Git.
 
-## What this does not fix
+## Restart behavior
+Each service has `restart: unless-stopped`. Airflow comes back on its own after
+a reboot, and it stays stopped only if someone stops it on purpose.
+This was tested with a server reboot.
 
-- A laptop that is asleep or powered off still cannot run anything.
-  Restarts only work while the machine is on.
-- If you need the pipeline to run continuously, put Airflow on a machine
-  that is always on: a small cloud VM (for example a free-tier instance on
-  Oracle, GCP, or Azure) running the same compose file. The DAG code does not
-  change; only where Airflow runs changes.
-
-## Check that it worked
-
+## Useful commands (run on the server, in `~/airflow`)
 ```bash
-docker compose ps            # all services 'running' or 'healthy'
-docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' $(docker compose ps -q airflow-scheduler)
-# expected output: unless-stopped
+docker compose ps                              # service status
+docker compose logs airflow-scheduler --tail 50  # recent scheduler logs
+docker compose restart                         # restart all services
 ```
+
+## Cost
+The server is billed while it runs. Stop it in the AWS console when you are
+not using it. Stopping keeps the setup; terminating deletes it.
