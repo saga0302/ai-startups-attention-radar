@@ -47,7 +47,7 @@ def pageviews_hourly_ingest():
         # Checks every 30 minutes for up to 8 hours. Wikimedia's publish delay varies.
         return hour_is_published(hour_utc)
 
-    @task
+    @task(pool="wikimedia")
     def stage(hour_utc: str) -> str:
         seed_map = title_to_entity(load_seed(SEED_PATH))
         path = stage_hour(hour_utc, seed_map, BRONZE_DIR)
