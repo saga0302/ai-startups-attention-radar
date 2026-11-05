@@ -3,7 +3,7 @@ import gzip
 from pathlib import Path
 
 import pytest
-
+from pageviews_anomaly import ingest
 from pageviews_anomaly.ingest import OUTPUT_FIELDS, stage_hour
 from pageviews_anomaly.seed import load_seed, title_to_entity
 
@@ -81,3 +81,70 @@ def test_stage_hour_sums_desktop_and_mobile_views(tmp_path):
     with gzip.open(out, "rt", encoding="utf-8") as f:
         rows = list(csv.reader(f))
     assert rows[1:] == [["anthropic", "Anthropic", "2026-11-02T14:00:00Z", "35"]]
+
+
+
+class _FakeResponse:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+def test_hour_is_published_true_when_file_exists(monkeypatch):
+    seen = {}
+
+    def fake_urlopen(req, timeout=None):
+        seen["method"] = req.get_method()
+        return _FakeResponse()
+
+    monkeypatch.setattr(ingest.urllib.request, "urlopen", fake_urlopen)
+    assert ingest.hour_is_published("2026-11-04T11:00:00Z") is True
+    assert seen["method"] == "HEAD"
+
+
+def test_hour_is_published_false_on_404(monkeypatch):
+    import urllib.error
+
+    def fake_urlopen(req, timeout=None):
+        raise urllib.error.HTTPError(req.full_url, 404, "Not Found", None, None)
+
+    monkeypatch.setattr(ingest.urllib.request, "urlopen", fake_urlopen)
+    assert ingest.hour_is_published("2026-11-04T11:00:00Z") is False
+
+
+def test_hour_is_published_false_on_server_error_or_network_error(monkeypatch):
+    import urllib.error
+
+    def fake_5xx(req, timeout=None):
+        raise urllib.error.HTTPError(req.full_url, 503, "Unavailable", None, None)
+
+    monkeypatch.setattr(ingest.urllib.request, "urlopen", fake_5xx)
+    assert ingest.hour_is_published("2026-11-04T11:00:00Z") is False
+
+    def fake_network(req, timeout=None):
+        raise urllib.error.URLError("timed out")
+
+    monkeypatch.setattr(ingest.urllib.request, "urlopen", fake_network)
+    assert ingest.hour_is_published("2026-11-04T11:00:00Z") is False
+
+
+def test_hour_is_published_raises_on_other_client_errors(monkeypatch):
+    import urllib.error
+
+    def fake_403(req, timeout=None):
+        raise urllib.error.HTTPError(req.full_url, 403, "Forbidden", None, None)
+
+    monkeypatch.setattr(ingest.urllib.request, "urlopen", fake_403)
+    with pytest.raises(urllib.error.HTTPError):
+        ingest.hour_is_published("2026-11-04T11:00:00Z")
+
+def test_hour_is_published_timeout_counts_as_not_yet(monkeypatch):
+    from pageviews_anomaly import ingest
+
+    def timed_out(*args, **kwargs):
+        raise TimeoutError("timed out")
+
+    monkeypatch.setattr(ingest.urllib.request, "urlopen", timed_out)
+    assert ingest.hour_is_published("2026-11-04T04:00:00Z") is False

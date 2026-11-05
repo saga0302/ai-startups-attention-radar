@@ -11,6 +11,7 @@ import gzip
 import io
 import os
 import tempfile
+import urllib.error
 import urllib.request
 from datetime import datetime
 from pathlib import Path
@@ -20,6 +21,26 @@ from pageviews_anomaly.parse import dump_url, filter_lines
 
 USER_AGENT = "pageviews-anomaly-pipeline/0.1 (research; contact: project owner)"
 OUTPUT_FIELDS = ["entity_id", "en_wikipedia_title", "hour_utc", "views"]
+
+
+def hour_is_published(hour_utc: str, timeout: int = 30) -> bool:
+    """True when Wikimedia has this hour's dump file.
+
+    404 means not published yet. A 5xx or a network error is also treated as
+    "not yet" so the sensor polls again; the sensor's timeout bounds the wait.
+    Other 4xx errors raise, because they point to a real problem.
+    """
+    request = urllib.request.Request(dump_url(hour_utc), method="HEAD", headers={"User-Agent": USER_AGENT})
+    try:
+        with urllib.request.urlopen(request, timeout=timeout):
+            return True
+    except urllib.error.HTTPError as err:
+        if err.code == 404 or err.code >= 500:
+            return False
+        raise
+    except OSError:
+        # Covers URLError (no connection, DNS) and TimeoutError (server stopped responding).
+        return False
 
 
 def iter_dump_lines(url: str, timeout: int = 120) -> Iterator[str]:
