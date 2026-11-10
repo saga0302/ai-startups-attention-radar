@@ -9,6 +9,7 @@ from __future__ import annotations
 import csv
 import gzip
 import io
+import logging
 import os
 import tempfile
 import urllib.error
@@ -22,24 +23,32 @@ from pageviews_anomaly.parse import dump_url, filter_lines
 USER_AGENT = "pageviews-anomaly-pipeline/0.1 (research; contact: project owner)"
 OUTPUT_FIELDS = ["entity_id", "en_wikipedia_title", "hour_utc", "views"]
 
+log = logging.getLogger(__name__)
+
 
 def hour_is_published(hour_utc: str, timeout: int = 30) -> bool:
     """True when Wikimedia has this hour's dump file.
 
-    404 means not published yet. A 5xx or a network error is also treated as
-    "not yet" so the sensor polls again; the sensor's timeout bounds the wait.
-    Other 4xx errors raise, because they point to a real problem.
+    404 means not published yet. A 429, 5xx, or network error is logged and
+    treated as "not yet" so the sensor polls again; the sensor's timeout bounds
+    the wait. Other errors raise, because they point to a real problem.
     """
     request = urllib.request.Request(dump_url(hour_utc), method="HEAD", headers={"User-Agent": USER_AGENT})
     try:
         with urllib.request.urlopen(request, timeout=timeout):
+            log.info("%s is published", hour_utc)
             return True
     except urllib.error.HTTPError as err:
-        if err.code == 404 or err.code >= 500:
+        if err.code == 404:
+            log.info("%s not published yet (HTTP 404)", hour_utc)
+            return False
+        if err.code == 429 or err.code >= 500:
+            log.warning("%s check got HTTP %s, will retry", hour_utc, err.code)
             return False
         raise
-    except OSError:
+    except OSError as err:
         # Covers URLError (no connection, DNS) and TimeoutError (server stopped responding).
+        log.warning("%s check failed: %r, will retry", hour_utc, err)
         return False
 
 
