@@ -18,12 +18,13 @@ from airflow.sdk import dag, task
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from pageviews_anomaly.ingest import hour_is_published, stage_hour  # noqa: E402
+from pageviews_anomaly.ingest import hour_is_published, stage_hour, upload_to_s3  # noqa: E402
 from pageviews_anomaly.seed import load_seed, title_to_entity  # noqa: E402
 
 LAG_HOURS = 3
 SEED_PATH = Path(__file__).parent / "seeds" / "ai_companies.csv"
 BRONZE_DIR = os.environ.get("PAGEVIEWS_BRONZE_DIR", "/opt/airflow/data/bronze")
+S3_BUCKET = os.environ.get("PAGEVIEWS_S3_BUCKET", "attention-radar-bronze-sr")
 
 
 @dag(
@@ -53,11 +54,15 @@ def pageviews_hourly_ingest():
         path = stage_hour(hour_utc, seed_map, BRONZE_DIR)
         return str(path)
 
+    @task
+    def upload(local_path: str, hour_utc: str) -> str:
+        return upload_to_s3(local_path, S3_BUCKET, hour_utc)
+
     hour = hour_to_process()
     published = hour_published(hour)
     staged = stage(hour)
+    uploaded = upload(staged, hour)
     published >> staged
 
+
 pageviews_hourly_ingest()
-
-

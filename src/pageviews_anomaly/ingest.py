@@ -102,3 +102,13 @@ def stage_hour(
             os.remove(tmp_name)
         raise
     return final_path
+
+
+def upload_to_s3(local_path: str | Path, bucket: str, hour_utc: str) -> str:
+    """Upload one hour's file to bronze/pageviews/dt=YYYY-MM-DD/hour=HH/. Safe to rerun."""
+    import boto3
+
+    dt = datetime.strptime(hour_utc, "%Y-%m-%dT%H:%M:%SZ")
+    key = f"bronze/pageviews/dt={dt:%Y-%m-%d}/hour={dt:%H}/{Path(local_path).name}"
+    boto3.client("s3").upload_file(str(local_path), bucket, key)
+    return key
