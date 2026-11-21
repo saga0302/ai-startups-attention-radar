@@ -1,6 +1,6 @@
 entity_id,display_name,role,hq_country,en_wikipedia_title,title_pinned_on,title_status,notes
-anthropic,Anthropic,benchmark,US (in category),Anthropic,2026-11-03,exists_in_wikipedia_list,Large lab; reference for high attention
-openai,OpenAI,benchmark,US (in category),OpenAI,2026-11-03,exists_in_wikipedia_list,Large lab; reference for high attention
+anthropic,Anthropic,reference,US (in category),Anthropic,2026-11-03,exists_in_wikipedia_list,Large lab; reference for high attention
+openai,OpenAI,reference,US (in category),OpenAI,2026-11-03,exists_in_wikipedia_list,Large lab; reference for high attention
 perplexity,Perplexity AI,startup,US (in category),Perplexity_AI,2026-11-03,exists_in_wikipedia_list,
 hugging_face,Hugging Face,startup,US (in category),Hugging_Face,2026-11-03,exists_in_wikipedia_list,Headquartered in New York; founders have French ties; confirm country rule
 scale_ai,Scale AI,startup,US (in category),Scale_AI,2026-11-03,exists_in_wikipedia_list,
@@ -13,7 +13,7 @@ figure_ai,Figure AI,startup,"not in category, verify HQ",Figure_AI,2026-11-03,ve
 anysphere,Anysphere (Cursor),startup,"not in category, verify HQ",Anysphere,2026-11-03,exists_in_wikipedia_list,Company page. Also exists as Cursor (company) and Cursor (code editor); pick one
 shield_ai,Shield AI,startup,"not in category, verify HQ",Shield_AI,2026-11-03,exists_in_wikipedia_list,Defense AI pilot software; title not confirmed by search
 harvey,Harvey,startup,"not in category, verify HQ",Harvey_(software),2026-11-03,title_from_list_check_page,List links 'Counsel AI' to Harvey_(software); confirm this is the company article
-xai,xAI,benchmark,"not in category, verify HQ",XAI_(company),2026-11-03,verified_by_search,Large lab. Category page lists 'SpaceXAI'; check whether XAI_(company) still is the current article
+xai,xAI,reference,"not in category, verify HQ",XAI_(company),2026-11-03,verified_by_search,Large lab. Category page lists 'SpaceXAI'; check whether XAI_(company) still is the current article
 cognition,Cognition AI,startup,US (in category),Cognition_AI,2026-11-03,exists_in_wikipedia_list,AI coding agent (Devin)
 contextual_ai,Contextual AI,startup,"not in category, verify HQ",Contextual_AI,2026-11-03,exists_in_wikipedia_list,Enterprise RAG
 decagon,Decagon,startup,"not in category, verify HQ",Decagon_(company),2026-11-03,exists_in_wikipedia_list,AI customer support
@@ -43,6 +43,6 @@ project_prometheus,Project Prometheus,startup,"not in category, verify HQ",Proje
 writesonic,Writesonic,startup,US (in category),Writesonic,2026-11-03,exists_in_wikipedia_list,AI writing; HQ unclear
 undetectable_ai,Undetectable.ai,startup,"not in category, verify HQ",Undetectable.ai,2026-11-03,exists_in_wikipedia_list,AI text tool; HQ unclear
 caper,Caper AI,startup,US (in category),Caper_AI,2026-11-03,exists_in_wikipedia_list,AI shopping carts; HQ unclear
-google_deepmind,Google DeepMind,benchmark,"UK (London), verify",Google_DeepMind,2026-11-03,exists_in_wikipedia_list,"Large AI lab; listed as DeepMind on Wikipedia list; not in US category, HQ is London per my knowledge"
-meta_ai,Meta AI,benchmark,US (in category),Meta_AI,2026-11-03,exists_in_wikipedia_list,Large AI lab
-microsoft_ai,Microsoft AI,benchmark,US (in category),Microsoft_AI,2026-11-03,exists_in_wikipedia_list,Large AI unit of Microsoft
+google_deepmind,Google DeepMind,reference,"UK (London), verify",Google_DeepMind,2026-11-03,exists_in_wikipedia_list,"Large AI lab; listed as DeepMind on Wikipedia list; not in US category, HQ is London per my knowledge"
+meta_ai,Meta AI,reference,US (in category),Meta_AI,2026-11-03,exists_in_wikipedia_list,Large AI lab
+microsoft_ai,Microsoft AI,reference,US (in category),Microsoft_AI,2026-11-03,exists_in_wikipedia_list,Large AI unit of Microsoft

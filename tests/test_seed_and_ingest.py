@@ -19,7 +19,7 @@ def test_real_seed_loads_and_titles_are_unique():
 
 def test_every_row_has_role_and_known_status():
     rows = load_seed(SEED)
-    assert {r["role"] for r in rows} <= {"startup", "benchmark"}
+    assert {r["role"] for r in rows} <= {"startup", "reference"}
     assert all(r["title_status"] for r in rows)
 
 
@@ -148,3 +148,4 @@ def test_hour_is_published_timeout_counts_as_not_yet(monkeypatch):
 
     monkeypatch.setattr(ingest.urllib.request, "urlopen", timed_out)
     assert ingest.hour_is_published("2026-11-04T04:00:00Z") is False
+

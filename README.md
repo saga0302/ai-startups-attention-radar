@@ -6,7 +6,7 @@ high compared with its own recent history.
 
 A startup can use it to see whether a launch, funding round, or announcement changed
 how many people looked it up, and how that compares with its peers. Large AI labs are
-tracked as benchmarks, to show what high attention looks like on the same measure.
+tracked as reference labs, to show what high attention looks like on the same measure.
 
 ## The problem
 
@@ -36,8 +36,8 @@ startups. A company joins the panel only if it:
 
 The panel is not capped at a fixed size. It grows as companies meet the rule.
 
-**Benchmarks: large AI companies.** Anthropic, OpenAI, xAI, Google DeepMind, Meta AI,
-and Microsoft AI. Benchmarks are reported separately and are never ranked against
+**Reference labs: large AI companies.** Anthropic, OpenAI, xAI, Google DeepMind, Meta AI,
+and Microsoft AI. Reference labs are reported separately and are never ranked against
 startups.
 
 **Time range:** at least 12 months of history, so that rolling windows and seasonal
@@ -113,7 +113,7 @@ GitHub ── stores the code
 dags/                       Airflow DAG (hourly schedule)
 src/pageviews_anomaly/      Core logic: parsing, filtering, z-score, seed loading
 tests/                      Automated tests (21)
-seeds/ai_companies.csv      Company panel and benchmark list
+seeds/ai_companies.csv      Company panel and reference lab list
 infra/airflow/              Notes on running Airflow on EC2
 pyproject.toml              Project settings and test configuration
 ```
@@ -161,3 +161,5 @@ download data or connect to Airflow or Databricks.
   noisy until a minimum-volume rule is in place.
 - **Titles and redirects:** renamed articles split their traffic. Titles are pinned in
   the seed file, and changes are recorded there.
+
+  
