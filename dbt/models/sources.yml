@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: workspace
+    schema: default
+    tables:
+      - name: pageviews_bronze
+        description: "Hourly raw pageviews per AI company article, loaded from S3 by bronze_incremental_load."

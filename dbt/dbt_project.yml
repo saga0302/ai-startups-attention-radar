@@ -1,0 +1,13 @@
+name: attention_radar
+version: "1.0.0"
+config-version: 2
+profile: attention_radar
+
+model-paths: ["models"]
+test-paths: ["tests"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  attention_radar:
+    +materialized: table
