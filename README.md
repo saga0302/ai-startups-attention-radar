@@ -145,7 +145,7 @@ download data or connect to Airflow or Databricks.
 1. Confirm every title in `seeds/ai_companies.csv` on Wikipedia, and set its
    `title_status` once checked.
 2. Confirm the headquarters of each startup marked `not in category, verify HQ`.
-3. Set the minimum-volume threshold below which articles are reported but not flagged.
+3. Minimum-volume threshold: decided not to add one for now. Quiet articles are scored as they are.
 4. Confirm that the EC2 server can download a Wikimedia file.
 
 ## Known limitations
@@ -157,8 +157,8 @@ download data or connect to Airflow or Databricks.
 - **Attribution is manual:** the pipeline flags spikes but does not explain them.
 - **Flat history:** a company whose views have been exactly flat receives no score, so
   a jump from a flat baseline is not flagged yet.
-- **Thin coverage:** many startups have few or no Wikipedia views, so their scores are
-  noisy until a minimum-volume rule is in place.
+- **Thin coverage:** many startups have few Wikipedia views, so their scores can move a lot
+  on small changes. No minimum-volume rule is applied yet.
 - **Titles and redirects:** renamed articles split their traffic. Titles are pinned in
   the seed file, and changes are recorded there.
 

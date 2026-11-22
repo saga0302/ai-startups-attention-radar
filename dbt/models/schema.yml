@@ -20,14 +20,9 @@ models:
         tests: [not_null]
 
   - name: flagged_days
-    description: "Gold table: days a company was flagged as a spike or a drop, with the z-score."
+    description: "Gold table: days a company was flagged as a spike (z > 3), with the z-score."
     columns:
       - name: entity_id
         tests: [not_null]
       - name: day_utc
         tests: [not_null]
-      - name: direction
-        tests:
-          - accepted_values:
-              arguments:
-                values: ['spike', 'drop']
