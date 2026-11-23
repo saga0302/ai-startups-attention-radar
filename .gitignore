@@ -13,3 +13,9 @@ dbt/target/
 dbt/dbt_packages/
 dbt/logs/
 dbt/.user.yml
+
+# macOS Finder metadata
+.DS_Store
+
+# Streamlit local secrets (contains the Databricks token)
+dashboard/.streamlit/secrets.toml
