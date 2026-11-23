@@ -2,6 +2,8 @@
 
 **Author:** Sagarika Raju
 
+**Live dashboard:** https://ai-startups-attention-radar-hyf2ezfjgs9cfr6rcv54jv.streamlit.app/
+
 Attention Radar measures how much public attention AI startups receive on English
 Wikipedia, hour by hour, and flags the moments when a company's traffic is unusually
 high compared with its own recent history.
@@ -91,7 +93,7 @@ Bronze files are written atomically, and running the same hour twice produces th
   ![Databricks dashboard](images/databricks-dashboard.png)
 
 - **Live Streamlit app:** the same results, reading the Databricks tables directly, so it
-  updates as new data is loaded. Link: `https://ai-startups-attention-radar-hyf2ezfjgs9cfr6rcv54jv.streamlit.app/` 
+  updates as new data is loaded.
 
 ## Architecture
 
