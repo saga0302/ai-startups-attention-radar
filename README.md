@@ -91,7 +91,7 @@ Bronze files are written atomically, and running the same hour twice produces th
   ![Databricks dashboard](images/databricks-dashboard.png)
 
 - **Live Streamlit app:** the same results, reading the Databricks tables directly, so it
-  updates as new data is loaded. Link: `<link to Streamlit app>`
+  updates as new data is loaded. Link: `https://ai-startups-attention-radar-hyf2ezfjgs9cfr6rcv54jv.streamlit.app/`
 
 ## Architecture
 
