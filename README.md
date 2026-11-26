@@ -1,6 +1,6 @@
 # Attention Radar: AI Startup Visibility from Wikipedia Pageviews
 
-**Author:** Sagarika Raju
+**Author:** Sagarika Raju 
 
 **Live dashboard:** https://ai-startups-attention-radar-hyf2ezfjgs9cfr6rcv54jv.streamlit.app/
 
